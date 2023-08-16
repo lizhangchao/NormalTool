@@ -1,0 +1,91 @@
+﻿<Window x:Class="GPSpeedView.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GPSpeedView"
+        xmlns:converter="clr-namespace:GPSpeedView.Converters"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        mc:Ignorable="d" x:Name="main" Closed="main_Closed" 
+        Title="监控" Height="450" Width="600">
+    <Window.Resources>
+        <converter:OrderByToBooleanConverter x:Key="orderByToBooleanConverter"/>
+        <converter:OrderByToVisibilityConverter x:Key="orderByToVisibilityConverter"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Menu x:Name="MenuItems">
+            <MenuItem x:Name="SettingMenuItem" Header="设置" Click="SettingMenuItem_Click"/>
+            <MenuItem x:Name="SortSettingMenuItem" Header="排序">
+                <MenuItem x:Name="CurACCERMenuItem" Header="涨速" IsCheckable="True" IsChecked="{Binding OrderBy,Converter={StaticResource orderByToBooleanConverter},ConverterParameter=ACCER}"/>
+                <MenuItem x:Name="CUrACCERInFiveMenuItem" Header="五分钟涨速" IsCheckable="True" IsChecked="{Binding OrderBy,Converter={StaticResource orderByToBooleanConverter},ConverterParameter=ACCERInFive}"/>
+            </MenuItem>
+            <MenuItem x:Name="RemoveListItem" Header="移除列表" Click="RemoveListItem_Click"/>
+            <MenuItem x:Name="ShowTodayItem" Header="查看今日选股" Click="ShowTodayItem_Click"/>
+            <MenuItem x:Name="SelectTimeItem" Header="时间选择" Visibility="Collapsed"/>
+            <MenuItem x:Name="LockListItem" Header="自选" Click="LockListItem_Click"/>
+            <MenuItem x:Name="ExportListItem" Header="导出" Click="ExportListItem_Click"/>
+            
+        </Menu>
+        <DataGrid x:Name="GpDataGrid" Grid.Row="1" ItemsSource="{Binding GPData}" AutoGenerateColumns="False" MouseLeftButtonUp="GpDataGrid_MouseLeftButtonUp"
+                  FontSize="15" EnableColumnVirtualization="False" EnableRowVirtualization="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="序号" Binding="{Binding Num}" Width="40" IsReadOnly="True"/>
+                <DataGridTextColumn Header="代号" Binding="{Binding Code}" Width="80" IsReadOnly="True"/>
+                <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="80" IsReadOnly="True"/>
+                <DataGridTextColumn Header="当前价" Binding="{Binding CurPrice}" Width="60" IsReadOnly="True"/>
+                <DataGridTemplateColumn  Header="涨幅"  Width="50" IsReadOnly="True" SortMemberPath="CurMarkUp">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <!--<TextBlock Text="{Binding CurMarkUp}" Background="{Binding BackColorForMarkUp}"/>-->
+                            <TextBlock Text="{Binding CurMarkUp}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn x:Name="ColumnACCER" Header="涨速" Width="50"
+                                        Visibility="{Binding OrderBy,Converter={StaticResource orderByToVisibilityConverter},ConverterParameter=ACCER}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding CurAccer}" Background="{Binding BackColor}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn x:Name="ColumnACCERInFive" Header="五分钟涨速" Width="90"
+                                        Visibility="{Binding OrderBy,Converter={StaticResource orderByToVisibilityConverter},ConverterParameter=ACCERInFive}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding CurAccerInFive}" Background="{Binding BackColorInFive}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn x:Name="ColumnClose" Header="操作" Width="130">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="LockBtn"  Click="LockBtn_Click"  Height="25" Width="25" Background="White">
+                                    <Button.Content>
+                                        <iconPacks:FeatherIcons Kind="Flag"/>
+                                    </Button.Content>
+                                </Button>
+                                <Button x:Name="browenBtn"   Click="browenBtn_Click"  Height="25" Width="25" Margin="5 0 0 0" Background="White">
+                                    <Button.Content>
+                                        <iconPacks:BootstrapIcons Kind="Globe"/>
+                                    </Button.Content>
+                                </Button>
+                                <Button x:Name="CloseBtn"   Click="CloseBtn_Click" Height="25" Width="25" Margin="5 0 0 0" Background="White">
+                                    <Button.Content>
+                                        <iconPacks:FontAwesome Kind="MinusSquareRegular"/>
+                                    </Button.Content>
+                                </Button>
+
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>
