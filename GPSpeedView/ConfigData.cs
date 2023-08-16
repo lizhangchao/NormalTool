@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace GPSpeedView
 {
+    /// <summary>
+    /// leixing
+    /// </summary>
     public class ConfigData
     {
         public static string LockGpsFilePath = "DataTxt//LockGpsData.txt";
