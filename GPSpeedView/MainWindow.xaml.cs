@@ -551,6 +551,9 @@ namespace GPSpeedView
 
             DateTime tdStartTime = now.Date + ConfigData.GpStartTime;
             DateTime tdStopTime = now.Date + ConfigData.GpStopTime;
+            if (DateTime.Compare(now, tdStartTime) <= 0
+                || DateTime.Compare(now, tdStopTime) > 0)
+                return;
             string url = $"http://74.push2.eastmoney.com/api/qt/clist/get?&pn=1&pz={total}&po=1&np=1&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f22&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&fields=f2,f3,f12,f14,f20,f22,f11";
             var ents = GetGPData(url).Result;
 
