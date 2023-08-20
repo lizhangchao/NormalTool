@@ -186,18 +186,20 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="DataHelper.cs" />
-    <Compile Include="GPDetailView.xaml.cs">
+    <Compile Include="GPHelpers\AlGpHelper.cs" />
+    <Compile Include="GPHelpers\DataHelper.cs" />
+    <Compile Include="Models\AlGpEntity.cs" />
+    <Compile Include="Views\GPDetailView.xaml.cs">
       <DependentUpon>GPDetailView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="RemoveListView.xaml.cs">
+    <Compile Include="Views\RemoveListView.xaml.cs">
       <DependentUpon>RemoveListView.xaml</DependentUpon>
     </Compile>
-    <Page Include="ConfigView.xaml">
+    <Page Include="Views\ConfigView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="GPDetailView.xaml">
+    <Page Include="Views\GPDetailView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -209,8 +211,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ConfigData.cs" />
-    <Compile Include="ConfigView.xaml.cs">
+    <Compile Include="Models\ConfigData.cs" />
+    <Compile Include="Views\ConfigView.xaml.cs">
       <DependentUpon>ConfigView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\ViewConverter.cs" />
@@ -218,7 +220,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="RemoveListView.xaml">
+    <Page Include="Views\RemoveListView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
