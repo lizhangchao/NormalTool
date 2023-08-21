@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -161,7 +162,8 @@ namespace GPSpeedView.GPHelpers
             return codes;
         }
 
-        public static void LoadHistoryGpInfo()
+        public static int HistoryGpNum;
+        public static void LoadHistoryGpInfo(BackgroundWorker worker)
         {
             try
             {
@@ -170,6 +172,7 @@ namespace GPSpeedView.GPHelpers
                     Directory.CreateDirectory("HistoryInfo");
                 }
                 var codes = GetValidGpCodes();
+                HistoryGpNum = codes.Count;
                 foreach (var item in codes)
                 {
                     bool hasEx = false;
@@ -189,6 +192,8 @@ namespace GPSpeedView.GPHelpers
 
                     string json = JsonConvert.SerializeObject(list);
                     File.WriteAllText("HistoryInfo//" + item + ".json", json);
+                    int i = codes.IndexOf(item);
+                    worker.ReportProgress((i + 1) * 100 / codes.Count,i + 1);
                 }
             }
             catch (Exception)

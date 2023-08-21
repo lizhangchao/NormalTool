@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -344,9 +345,14 @@ namespace GPSpeedView
         {
             if(MessageBox.Show("确定要加载历史数据吗？","提示",MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-                System.Threading.Thread thread = new System.Threading.Thread(AlGpHelper.LoadHistoryGpInfo) ;
-                thread.Start();
+                m_ViewModel.worker.RunWorkerAsync();
+                //System.Threading.Thread thread = new System.Threading.Thread(LoadHistoryExecute) ;
+                //thread.Start();
             }
+        }
+        public void LoadHistoryExecute()
+        {
+            AlGpHelper.LoadHistoryGpInfo(m_ViewModel.worker);
         }
 
         #endregion
@@ -358,6 +364,7 @@ namespace GPSpeedView
 
         private Timer timer = new Timer();
         private Timer backDataTimer = new Timer();
+        public BackgroundWorker worker;
         private string url1ForACCER = "http://74.push2.eastmoney.com/api/qt/clist/get?&pn=1&pz=40&po=1&np=1&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f22&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&fields=f2,f3,f12,f14,f20,f22,f11";
         private string url1ForACCERInFive = "http://74.push2.eastmoney.com/api/qt/clist/get?&pn=1&pz=40&po=1&np=1&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f11&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&fields=f2,f3,f12,f14,f20,f22,f11";
 
@@ -416,7 +423,14 @@ namespace GPSpeedView
             }
             else
             {
+                worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = true;
+                worker.DoWork += Worker_DoWork;
+                worker.ProgressChanged += Worker_ProgressChanged;
+                worker.RunWorkerCompleted += Worker_RunWorkerCompleted;
+
                 InitData();
+
                 timer.Interval = 3000;
                 timer.Elapsed -= FlashData;
                 timer.Elapsed += FlashData;
@@ -427,7 +441,28 @@ namespace GPSpeedView
                 backDataTimer.Elapsed -= SufferData;
                 backDataTimer.Elapsed += SufferData;
                 backDataTimer.Start();
+
+
             }
+        }
+
+        private void Worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            m_View.progressBar.Value = 0;
+            m_View.barText.Text = "";
+        }
+
+        private void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            m_View.progressBar.Value = e.ProgressPercentage;
+
+            int currentTask = (int)e.UserState;
+            m_View.barText.Text = $"正在加载历史数据（{currentTask}/{AlGpHelper.HistoryGpNum}）";
+        }
+
+        private void Worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            AlGpHelper.LoadHistoryGpInfo(worker);
         }
 
         #endregion
@@ -939,8 +974,10 @@ namespace GPSpeedView
                 }
 
                 // 盘后加载历史数据
-                System.Threading.Thread thread = new System.Threading.Thread(AlGpHelper.LoadHistoryGpInfo);
-                thread.Start();
+                worker.RunWorkerAsync();
+
+                //System.Threading.Thread thread = new System.Threading.Thread(m_View.LoadHistoryExecute);
+                //thread.Start();
             }
         }
         /// <summary>

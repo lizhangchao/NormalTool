@@ -16,6 +16,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition/>
+            <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         <Menu x:Name="MenuItems">
             <MenuItem x:Name="SettingMenuItem" Header="设置" Click="SettingMenuItem_Click"/>
@@ -88,5 +89,9 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
+        <StackPanel Orientation="Horizontal" Grid.Row="2">
+            <ProgressBar x:Name="progressBar" Width="400" Margin="10 3 10 3"/>
+            <TextBlock x:Name="barText"/>
+        </StackPanel>
     </Grid>
 </Window>
