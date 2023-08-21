@@ -13,6 +13,9 @@ using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using GPSpeedView.GPHelpers;
+using GPSpeedView.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Prism;
 using Prism.Mvvm;
@@ -276,6 +279,15 @@ namespace GPSpeedView
             {
             }
             MessageBox.Show("导出成功");
+        }
+
+        private void LoadHistoryDataItem_Click(object sender, RoutedEventArgs e)
+        {
+            if(MessageBox.Show("确定要加载历史数据吗？","提示",MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                System.Threading.Thread thread = new System.Threading.Thread(AlGpHelper.LoadHistoryGpInfo) ;
+                thread.Start();
+            }
         }
     }
 
@@ -738,6 +750,14 @@ namespace GPSpeedView
                         }
                         bool isSucc = SelectAnaylseGp(item, item.CurAccer);
                         item.IsAnalyseGp = isSucc;
+                        if(File.Exists("HistoryInfo//" + item.Code + ".json"))
+                        {
+                            string json = File.ReadAllText("HistoryInfo//" + item.Code + ".json");
+                            List<GpDayEntity> list = JsonConvert.DeserializeObject<List<GpDayEntity>>(json);
+                            bool isHigh = AlGpHelper.HasHighChance(item.Code, list);
+                            item.IsHighGp = isHigh;
+                            isSucc = isHigh || isSucc;
+                        }
                         if (isSucc)
                         {
                             if (analyseGpsList.Find(x => x == item.Code) == null)
@@ -758,6 +778,14 @@ namespace GPSpeedView
                         }
                         bool isSucc = SelectAnaylseGp(item, item.CurAccerInFive);
                         item.IsAnalyseGp = isSucc;
+                        if (File.Exists("HistoryInfo//" + item.Code + ".json"))
+                        {
+                            string json = File.ReadAllText("HistoryInfo//" + item.Code + ".json");
+                            List<GpDayEntity> list = JsonConvert.DeserializeObject<List<GpDayEntity>>(json);
+                            bool isHigh = AlGpHelper.HasHighChance(item.Code, list);
+                            item.IsHighGp = isHigh;
+                            isSucc = isHigh || isSucc;
+                        }
                         if (isSucc)
                         {
                             if (analyseGpsList.Find(x => x == item.Code) == null)
@@ -918,6 +946,20 @@ namespace GPSpeedView
             }
         }
 
+        private bool m_IsHighGp;
+        /// <summary>
+        /// 高概率股
+        /// </summary>
+        public bool IsHighGp
+        {
+            get { return m_IsHighGp; }
+            set
+            {
+                m_IsHighGp = value;
+                RaisePropertyChanged();
+            }
+        }
+
         private double m_CurMarkValue;
         /// <summary>
         /// 市值
@@ -939,7 +981,9 @@ namespace GPSpeedView
             { 
                 if(m_CurAccer > ConfigData.MinACCER)
                 {
-                    if(IsAnalyseGp)
+                    if(IsHighGp)
+                        return new SolidColorBrush(Colors.Pink);
+                    if (IsAnalyseGp)
                         return new SolidColorBrush(Colors.Orange);
                     return new SolidColorBrush(Colors.Red);
                 }
@@ -962,6 +1006,8 @@ namespace GPSpeedView
             {
                 if (m_CurAccerInFive > ConfigData.MinACCER)
                 {
+                    if (IsHighGp)
+                        return new SolidColorBrush(Colors.Blue);
                     if (IsAnalyseGp)
                         return new SolidColorBrush(Colors.Orange);
                     return new SolidColorBrush(Colors.Red);

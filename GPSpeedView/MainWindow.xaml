@@ -28,6 +28,7 @@
             <MenuItem x:Name="SelectTimeItem" Header="时间选择" Visibility="Collapsed"/>
             <MenuItem x:Name="LockListItem" Header="自选" Click="LockListItem_Click"/>
             <MenuItem x:Name="ExportListItem" Header="导出" Click="ExportListItem_Click"/>
+            <MenuItem x:Name="LoadHistoryDataItem" Header="加载历史数据" Click="LoadHistoryDataItem_Click"/>
             
         </Menu>
         <DataGrid x:Name="GpDataGrid" Grid.Row="1" ItemsSource="{Binding GPData}" AutoGenerateColumns="False" MouseLeftButtonUp="GpDataGrid_MouseLeftButtonUp"
