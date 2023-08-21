@@ -938,8 +938,9 @@ namespace GPSpeedView
                     }
                 }
 
-                //WriteMidUpGpToFile(GPList);
-                //timer.Stop();
+                // 盘后加载历史数据
+                System.Threading.Thread thread = new System.Threading.Thread(AlGpHelper.LoadHistoryGpInfo);
+                thread.Start();
             }
         }
         /// <summary>

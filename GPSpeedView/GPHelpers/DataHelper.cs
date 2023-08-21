@@ -44,15 +44,17 @@ namespace GPSpeedView
             return gps;
         }
 
-        public static Dictionary<string, List<string>> GetMidFastUpGPs()
+        public static Dictionary<string, List<string>> GetMidFastUpGPs(string path = null)
         {
             Dictionary<string, List<string>> gps = new Dictionary<string, List<string>>();
 
+            if (path == null)
+                path = ConfigData.MidFastGpsFilePath;
             try
             {
-                if (File.Exists(ConfigData.MidFastGpsFilePath))
+                if (File.Exists(path))
                 {
-                    FileInfo fileInfo = new FileInfo(ConfigData.MidFastGpsFilePath);
+                    FileInfo fileInfo = new FileInfo(path);
                     using (StreamReader streamReader = fileInfo.OpenText())
                     {
                         string line = streamReader.ReadLine();
@@ -62,6 +64,10 @@ namespace GPSpeedView
                             if (strs.Count() == 2)
                             {
                                 var times = strs[0].Split('-');
+                                if(times.Count()!= 3)
+                                    times = strs[0].Split('/');
+                                if (times.Count() != 3)
+                                    continue;
                                 DateTime time = new DateTime(int.Parse(times[0]), int.Parse(times[1]), int.Parse(times[2]));
                                 var codes = strs[1].Split(';');
                                 List<string> codeList = new List<string>();
@@ -100,6 +106,10 @@ namespace GPSpeedView
                             if (strs.Count() == 2)
                             {
                                 var times = strs[0].Split('-');
+                                if (times.Count() != 3)
+                                    times = strs[0].Split('/');
+                                if (times.Count() != 3)
+                                    continue;
                                 DateTime time = new DateTime(int.Parse(times[0]), int.Parse(times[1]), int.Parse(times[2]));
                                 var codes = strs[1].Split(';');
                                 List<string> codeList = new List<string>();
