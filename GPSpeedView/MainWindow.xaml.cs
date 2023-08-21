@@ -61,6 +61,8 @@ namespace GPSpeedView
             }
             view.Show();
         }
+
+        #region 构造函数
         public MainWindow()
         {
             InitializeComponent();
@@ -109,6 +111,9 @@ namespace GPSpeedView
 
         }
 
+        #endregion
+
+        #region 私有方法
         private void AddTimeItems()
         {
             foreach (var item in ConfigData.MidFastUpGPs.Keys)
@@ -119,24 +124,45 @@ namespace GPSpeedView
                 SelectTimeItem.Items.Add(menu);
             }
         }
+        #endregion
+
+        #region 命令执行方法
+        /// <summary>
+        /// 点击历史数据时间
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SelectTimeItem_Click(object sender, RoutedEventArgs e)
         {
             var menu = sender as MenuItem;
             m_Time = menu.Header.ToString();
             m_ViewModel.InitDataForOldGps(m_Time);
         }
+        /// <summary>
+        /// 点击设置界面
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SettingMenuItem_Click(object sender, RoutedEventArgs e)
         {
             ConfigView view = new ConfigView();
             view.Show();
         }
-
+        /// <summary>
+        /// 点击打开移除列表
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void RemoveListItem_Click(object sender, RoutedEventArgs e)
         {
             RemoveListView view = new RemoveListView();
             view.Show();
         }
-
+        /// <summary>
+        /// 点击显示分时数据
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void GpDataGrid_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (GpDataGrid.SelectedItem != null)
@@ -146,7 +172,11 @@ namespace GPSpeedView
                 m_GPDetailView.Show();
             }
         }
-
+        /// <summary>
+        /// 点击删除按钮
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CloseBtn_Click(object sender, RoutedEventArgs e)
         {
             if (GpDataGrid.SelectedItem != null)
@@ -174,7 +204,11 @@ namespace GPSpeedView
                 }
             }
         }
-
+        /// <summary>
+        /// 点击添加自选
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void LockBtn_Click(object sender, RoutedEventArgs e)
         {
             if (GpDataGrid.SelectedItem != null)
@@ -187,12 +221,21 @@ namespace GPSpeedView
                 }
             }
         }
-
+        /// <summary>
+        /// 点击显示历史数据
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ShowTodayItem_Click(object sender, RoutedEventArgs e)
         {
             ShowView(1);
         }
 
+        /// <summary>
+        /// 界面关闭保存处理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void main_Closed(object sender, EventArgs e)
         {
             DataHelper.WriteMidFastUpGPs();
@@ -204,12 +247,20 @@ namespace GPSpeedView
                 DicMainView.Remove(m_ViewType);
             }
         }
-
+        /// <summary>
+        /// 点击显示自选数据
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void LockListItem_Click(object sender, RoutedEventArgs e)
         {
             ShowView(2);
         }
-
+        /// <summary>
+        /// 点击打开对应网页
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void browenBtn_Click(object sender, RoutedEventArgs e)
         {
             if (GpDataGrid.SelectedItem != null)
@@ -235,7 +286,11 @@ namespace GPSpeedView
                 Process.Start(psi);
             }
         }
-
+        /// <summary>
+        /// 点击导出
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ExportListItem_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -280,7 +335,11 @@ namespace GPSpeedView
             }
             MessageBox.Show("导出成功");
         }
-
+        /// <summary>
+        /// 点击加载历史数据
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void LoadHistoryDataItem_Click(object sender, RoutedEventArgs e)
         {
             if(MessageBox.Show("确定要加载历史数据吗？","提示",MessageBoxButton.YesNo) == MessageBoxResult.Yes)
@@ -289,6 +348,8 @@ namespace GPSpeedView
                 thread.Start();
             }
         }
+
+        #endregion
     }
 
     public class MainViewModel : BindableBase
@@ -297,8 +358,6 @@ namespace GPSpeedView
 
         private Timer timer = new Timer();
         private Timer backDataTimer = new Timer();
-        //private string url1ForACCER = "http://74.push2.eastmoney.com/api/qt/clist/get?&pn=1&pz=40&po=1&np=1&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f22&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&fields=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f24,f25,f22,f11,f62,f128,f136,f115,f152";
-        //private string url1ForACCERInFive = "http://74.push2.eastmoney.com/api/qt/clist/get?&pn=1&pz=40&po=1&np=1&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f11&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&fields=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f24,f25,f22,f11,f62,f128,f136,f115,f152";
         private string url1ForACCER = "http://74.push2.eastmoney.com/api/qt/clist/get?&pn=1&pz=40&po=1&np=1&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f22&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&fields=f2,f3,f12,f14,f20,f22,f11";
         private string url1ForACCERInFive = "http://74.push2.eastmoney.com/api/qt/clist/get?&pn=1&pz=40&po=1&np=1&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f11&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&fields=f2,f3,f12,f14,f20,f22,f11";
 
@@ -340,6 +399,8 @@ namespace GPSpeedView
 
         public string OldListTime { get; set; }
 
+        #region 构造方法
+
         public MainViewModel(MainWindow view)
         {
             m_View = view;
@@ -368,6 +429,14 @@ namespace GPSpeedView
                 backDataTimer.Start();
             }
         }
+
+        #endregion
+
+        #region 业务方法
+        /// <summary>
+        /// 根据时间初始化历史数据
+        /// </summary>
+        /// <param name="time"></param>
         public void InitDataForOldGps(string time)
         {
             DateTime now = DateTime.Now;
@@ -381,63 +450,25 @@ namespace GPSpeedView
                 if(DateTime.Compare(now, tdStopTime) > 0 
                     && ConfigData.MidFastUpGoDataInfo != null 
                     && ConfigData.MidFastUpGoDataInfo.ContainsKey(time)
-                    && ConfigData.MidFastUpGoDataInfo[time].Count > 0)
+                    && ConfigData.MidFastUpGoDataInfo[time].Count > 0
+                    && ConfigData.MidFastUpGoDataInfo[time].Count == gps.Count)
                 {
-                    GPData = new ObservableCollection<ViewEntity>(ConfigData.MidFastUpGoDataInfo[time]);
-                }
-                else
-                {
-                    foreach (var code in gps)
+                    bool isSame = true;
+                    foreach (var item in gps)
                     {
-                        int typeId = 0;
-                        if (code.StartsWith("00"))
+                        if (ConfigData.MidFastUpGoDataInfo[time].Find(x => x.Code == item) == null)
                         {
-                            typeId = 0;
+                            isSame = false;
+                            break;
                         }
-                        else if (code.StartsWith("60"))
-                        {
-                            typeId = 1;
-                        }
-                        else
-                        {
-                            continue;
-                        }
-                        string url = $"https://15.push2.eastmoney.com/api/qt/stock/get?fltt=2&invt=2&volt=2&fields=f43,f57,f58,f169,f170,f46,f44,f45&secid={typeId}.{code}";
-                        var ent = GetGPDataFOrOne(url).Result;
-                        ent.Num = index++;
-                        GPData.Add(ent);
                     }
-                    if(ConfigData.MidFastUpGoDataInfo == null)
+                    if (isSame)
                     {
-                        ConfigData.MidFastUpGoDataInfo = new Dictionary<string, List<ViewEntity>>();
-                    }
-                    if (ConfigData.MidFastUpGoDataInfo.ContainsKey(time))
-                    {
-                        ConfigData.MidFastUpGoDataInfo[time] = new List<ViewEntity>(GPData.ToList());
-                    }
-                    else
-                    {
-                        ConfigData.MidFastUpGoDataInfo.Add(time, new List<ViewEntity>(GPData.ToList()));
+                        GPData = new ObservableCollection<ViewEntity>(ConfigData.MidFastUpGoDataInfo[time]);
+                        return;
                     }
                 }
-            }
-        }
-        public void InitDataForLockGps()
-        {
-            DateTime now = DateTime.Now;
-            DateTime tdStopTime = now.Date + ConfigData.GpStopTime;
-
-            GPData.Clear();
-            int index = 1;
-            if (DateTime.Compare(now, tdStopTime) > 0
-    && ConfigData.LockGpDataInfo != null
-    && ConfigData.LockGpDataInfo.Count > 0)
-            {
-                GPData = new ObservableCollection<ViewEntity>(ConfigData.LockGpDataInfo);
-            }
-            else
-            {
-                foreach (var code in ConfigData.LockGPs)
+                foreach (var code in gps)
                 {
                     int typeId = 0;
                     if (code.StartsWith("00"))
@@ -457,15 +488,86 @@ namespace GPSpeedView
                     ent.Num = index++;
                     GPData.Add(ent);
                 }
-                ConfigData.LockGpDataInfo = new List<ViewEntity>(GPData.ToList());
+                if (ConfigData.MidFastUpGoDataInfo == null)
+                {
+                    ConfigData.MidFastUpGoDataInfo = new Dictionary<string, List<ViewEntity>>();
+                }
+                if (ConfigData.MidFastUpGoDataInfo.ContainsKey(time))
+                {
+                    ConfigData.MidFastUpGoDataInfo[time] = new List<ViewEntity>(GPData.ToList());
+                }
+                else
+                {
+                    ConfigData.MidFastUpGoDataInfo.Add(time, new List<ViewEntity>(GPData.ToList()));
+                }
             }
         }
+        /// <summary>
+        /// 初始化自选数据
+        /// </summary>
+        public void InitDataForLockGps()
+        {
+            DateTime now = DateTime.Now;
+            DateTime tdStopTime = now.Date + ConfigData.GpStopTime;
+
+            GPData.Clear();
+            int index = 1;
+            if (DateTime.Compare(now, tdStopTime) > 0
+    && ConfigData.LockGpDataInfo != null
+    && ConfigData.LockGpDataInfo.Count > 0
+    && ConfigData.LockGpDataInfo.Count == ConfigData.LockGPs.Count)
+            {
+                bool isSame = true;
+                foreach (var item in ConfigData.LockGPs)
+                {
+                    if(ConfigData.LockGpDataInfo.Find(x => x.Code == item) == null)
+                    {
+                        isSame = false;
+                        break;
+                    }
+                }
+                if (isSame)
+                {
+                    GPData = new ObservableCollection<ViewEntity>(ConfigData.LockGpDataInfo);
+                    return;
+                }
+            }
+            foreach (var code in ConfigData.LockGPs)
+            {
+                int typeId = 0;
+                if (code.StartsWith("00"))
+                {
+                    typeId = 0;
+                }
+                else if (code.StartsWith("60"))
+                {
+                    typeId = 1;
+                }
+                else
+                {
+                    continue;
+                }
+                string url = $"https://15.push2.eastmoney.com/api/qt/stock/get?fltt=2&invt=2&volt=2&fields=f43,f57,f58,f169,f170,f46,f44,f45&secid={typeId}.{code}";
+                var ent = GetGPDataFOrOne(url).Result;
+                ent.Num = index++;
+                GPData.Add(ent);
+            }
+            ConfigData.LockGpDataInfo = new List<ViewEntity>(GPData.ToList());
+        }
+        /// <summary>
+        /// 初始化实时数据
+        /// </summary>
         public void InitData()
         {
             FlashData(null,null);
         }
 
         private bool IsResponsing = false;
+        /// <summary>
+        /// 实时刷新数据
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void FlashData(object sender, ElapsedEventArgs e)
         {
             if (IsResponsing)
@@ -556,7 +658,11 @@ namespace GPSpeedView
             }
             IsResponsing = false;
         }
-
+        /// <summary>
+        /// 缓存实时数据
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SufferData(object sender, ElapsedEventArgs e)
         {
             DateTime now = DateTime.Now;
@@ -581,6 +687,11 @@ namespace GPSpeedView
                 }
             }
         }
+        /// <summary>
+        /// 根据代号获取实时分时数据
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
         private async Task<List<DetailEntity>> GetDetailData(string code)
         {
             List<DetailEntity> prices = new List<DetailEntity>();
@@ -641,6 +752,11 @@ namespace GPSpeedView
             }
             return prices;
         }
+        /// <summary>
+        /// 获取实时数据
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         private async Task<List<ViewEntity>> GetGPData(string url)
         {
             List<ViewEntity> ents = new List<ViewEntity>();
@@ -679,6 +795,11 @@ namespace GPSpeedView
             return ents;
         }
 
+        /// <summary>
+        /// 获取单个股数据
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         //f43 收盘价  f44 最高价  f45 最低价  f46 今天开盘价  f57 code  f58 name  f169 涨跌价 f170 涨跌幅
         private async Task<ViewEntity> GetGPDataFOrOne(string url)
         {
@@ -706,6 +827,10 @@ namespace GPSpeedView
             }
             return ent;
         }
+        /// <summary>
+        /// 实时数据处理(涨幅，优股，其他)
+        /// </summary>
+        /// <param name="GPList"></param>
         private void GetMidUpGp(List<ViewEntity> GPList)
         {
             DateTime now = DateTime.Now;
@@ -844,8 +969,13 @@ namespace GPSpeedView
             }
             return false;
         }
+
+        #endregion
     }
 
+    /// <summary>
+    /// 界面对象
+    /// </summary>
     public class ViewEntity : BindableBase
     {
         private int m_Num;
