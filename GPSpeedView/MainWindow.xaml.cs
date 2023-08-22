@@ -90,7 +90,7 @@ namespace GPSpeedView
                 ColumnACCERInFive.Visibility = Visibility.Collapsed;
                 ColumnACCER.Visibility = Visibility.Collapsed;
                 SelectTimeItem.Visibility = Visibility.Visible;
-
+                CheckColumn.Visibility = Visibility.Visible;
                 AddTimeItems();
 
             }
@@ -104,6 +104,9 @@ namespace GPSpeedView
                 ColumnACCERInFive.Visibility = Visibility.Collapsed;
                 ColumnACCER.Visibility = Visibility.Collapsed;
                 LockListItem.Visibility = Visibility.Collapsed;
+                CheckColumn.Visibility = Visibility.Visible;
+
+                LockRow.Height = new GridLength(30);
             }
             else
             {
@@ -159,20 +162,7 @@ namespace GPSpeedView
             RemoveListView view = new RemoveListView();
             view.Show();
         }
-        /// <summary>
-        /// 点击显示分时数据
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void GpDataGrid_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            if (GpDataGrid.SelectedItem != null)
-            {
-                var ent = GpDataGrid.SelectedItem as ViewEntity;
-                var m_GPDetailView = new GPDetailView(ent.Code);
-                m_GPDetailView.Show();
-            }
-        }
+
         /// <summary>
         /// 点击删除按钮
         /// </summary>
@@ -183,18 +173,34 @@ namespace GPSpeedView
             if (GpDataGrid.SelectedItem != null)
             {
                 var ent = GpDataGrid.SelectedItem as ViewEntity;
-                if(m_ViewType == 1)
+
+                var checkList = m_ViewModel.GPData.ToList().FindAll(x => x.IsChecked);
+                checkList.Add(ent);
+                if (m_ViewType == 1)
                 {
-                    if (ConfigData.MidFastUpGPs.ContainsKey(m_Time))
+                    if(MessageBox.Show("确定删除勾选项？","提示",MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                     {
-                        ConfigData.MidFastUpGPs[m_Time].RemoveAll(x => x == ent.Code);
+                        if (ConfigData.MidFastUpGPs.ContainsKey(m_Time))
+                        {
+                            foreach (var item in checkList)
+                            {
+                                ConfigData.MidFastUpGPs[m_Time].RemoveAll(x => x == item.Code);
+                            }
+                        }
+
+                        m_ViewModel.InitDataForOldGps(m_Time);
                     }
-                    m_ViewModel.InitDataForOldGps(m_Time);
                 }
                 else if (m_ViewType == 2)
                 {
-                    ConfigData.LockGPs.RemoveAll(x => x == ent.Code);
-                    m_ViewModel.InitDataForLockGps();
+                    if (MessageBox.Show("确定删除勾选项？", "提示", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    {
+                        foreach (var item in checkList)
+                        {
+                            ConfigData.LockGPs.RemoveAll(x => x == item.Code);
+                        }
+                        m_ViewModel.InitDataForLockGps();
+                    }
                 }
                 else
                 {
@@ -354,8 +360,72 @@ namespace GPSpeedView
         {
             AlGpHelper.LoadHistoryGpInfo(m_ViewModel.worker);
         }
+        /// <summary>
+        /// 添加自选gp
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AddBtn_Click(object sender, RoutedEventArgs e)
+        {
+            string code = addCodeBox.Text;
+            if (string.IsNullOrEmpty(code))
+                return;
+            if (ConfigData.LockGPs.Contains(code))
+            {
+                MessageBox.Show("已在自选列表");
+            }
+            else
+            {
+                var codes = AlGpHelper.GetValidGpCodes();
+                if (!codes.Contains(code))
+                {
+                    MessageBox.Show("所填代号无效");
+                }
+                else
+                {
+                    ConfigData.LockGPs.Add(code);
+                    m_ViewModel.InitDataForLockGps();
+                }
+            }
+            addCodeBox.Text = "";
+        }
 
+        /// <summary>
+        /// 点击显示分时数据
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void GpDataGrid_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (GpDataGrid.SelectedItem != null)
+            {
+                var ent = GpDataGrid.SelectedItem as ViewEntity;
+                var m_GPDetailView = new GPDetailView(ent.Code);
+                m_GPDetailView.Show();
+            }
+        }
+        /// <summary>
+        /// 一键添加今日涨停股到自选
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OneKeyToAddTop_Click(object sender, RoutedEventArgs e)
+        {
+            DateTime now = DateTime.Now;
+            DateTime tdStopTime = now.Date + ConfigData.GpStopTime;
+
+            if(DateTime.Compare(now,tdStopTime) < 0)
+            {
+                MessageBox.Show("请在收盘后进行一键操作");
+                return;
+            }
+            string day = DateTime.Now.Year + "" + DateTime.Now.Month + DateTime.Now.Day;
+            string url = $"http://push2ex.eastmoney.com/getTopicZTPool?ut=7eea3edcaed734bea9cbfc24409ed989&dpt=wz.ztzt&Pageindex=0&pagesize=20&sort=fbt%3Aasc&date={day}";
+
+        }
         #endregion
+
+
     }
 
     public class MainViewModel : BindableBase
@@ -405,6 +475,22 @@ namespace GPSpeedView
         }
 
         public string OldListTime { get; set; }
+
+        private bool m_IsAllChecked;
+
+        public bool IsAllChecked
+        {
+            get { return m_IsAllChecked; }
+            set 
+            { 
+                m_IsAllChecked = value;
+                foreach (var item in GPData)
+                {
+                    item.IsChecked = m_IsAllChecked;
+                }
+                this.RaisePropertyChanged();
+            }
+        }
 
         #region 构造方法
 
@@ -678,9 +764,14 @@ namespace GPSpeedView
                         ents.RemoveAt(i--);
                         continue;
                     }
+                    if (ConfigData.LockGPs.Contains(ents[i].Code))
+                    {
+                        ents[i].IsLock = true;
+                    }
                 }
                 int index = 1;
                 ents.ForEach(x => x.Num = index++);
+
                 GetMidUpGp(ents);
 
                 GPData = new ObservableCollection<ViewEntity>(ents);
@@ -1124,6 +1215,34 @@ namespace GPSpeedView
             set
             {
                 m_IsHighGp = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool m_IsLock = false;
+        /// <summary>
+        /// 是否是自选
+        /// </summary>
+        public bool IsLock
+        {
+            get { return m_IsLock; }
+            set
+            {
+                m_IsLock = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool m_IsChecked = false;
+        /// <summary>
+        /// 是否选中
+        /// </summary>
+        public bool IsChecked
+        {
+            get { return m_IsChecked; }
+            set
+            {
+                m_IsChecked = value;
                 RaisePropertyChanged();
             }
         }

@@ -15,6 +15,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="30" x:Name="LockRow"/>
             <RowDefinition/>
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
@@ -32,9 +33,36 @@
             <MenuItem x:Name="LoadHistoryDataItem" Header="加载历史数据" Click="LoadHistoryDataItem_Click"/>
             
         </Menu>
-        <DataGrid x:Name="GpDataGrid" Grid.Row="1" ItemsSource="{Binding GPData}" AutoGenerateColumns="False" MouseLeftButtonUp="GpDataGrid_MouseLeftButtonUp"
+        <StackPanel Orientation="Horizontal" Grid.Row="1">
+            <Label Content="代号：" FontSize="14" VerticalContentAlignment="Center" Margin="10 0 0 0"/>
+            <TextBox x:Name="addCodeBox" Width="100" Height="25" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+            <Button x:Name="AddBtn"  Click="AddBtn_Click"  Height="25" Width="25" Background="White" Margin="5 0 0 0">
+                <Button.Content>
+                    <iconPacks:MaterialDesign Kind="Add"/>
+                </Button.Content>
+            </Button>
+            <Button x:Name="OneKeyToAddTop" Content="一键添加今日涨停" Click="OneKeyToAddTop_Click" Height="25" Margin="10 0 0 0"/>
+        </StackPanel>
+        <DataGrid x:Name="GpDataGrid" Grid.Row="2" ItemsSource="{Binding GPData}" AutoGenerateColumns="False"
+                  MouseDoubleClick="GpDataGrid_MouseDoubleClick" CanUserAddRows="False"
                   FontSize="15" EnableColumnVirtualization="False" EnableRowVirtualization="False">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsLock}" Value="True">
+                            <Setter Property="Background" Value="LightGray"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
             <DataGrid.Columns>
+                <DataGridCheckBoxColumn x:Name="CheckColumn" Binding="{Binding IsChecked}" Visibility="Collapsed" >
+                    <DataGridCheckBoxColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <CheckBox x:Name="allCheckBox" IsChecked="{Binding ElementName=main, Path=DataContext.IsAllChecked}"/>
+                        </DataTemplate>
+                    </DataGridCheckBoxColumn.HeaderTemplate>
+                </DataGridCheckBoxColumn>
                 <DataGridTextColumn Header="序号" Binding="{Binding Num}" Width="40" IsReadOnly="True"/>
                 <DataGridTextColumn Header="代号" Binding="{Binding Code}" Width="80" IsReadOnly="True"/>
                 <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="80" IsReadOnly="True"/>
@@ -89,7 +117,7 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
-        <StackPanel Orientation="Horizontal" Grid.Row="2">
+        <StackPanel Orientation="Horizontal" Grid.Row="3">
             <ProgressBar x:Name="progressBar" Width="400" Margin="10 3 10 3"/>
             <TextBlock x:Name="barText"/>
         </StackPanel>
