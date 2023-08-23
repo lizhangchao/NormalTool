@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
@@ -44,7 +45,8 @@ namespace GPSpeedView
             else
             {
                 view = new MainWindow(viewType);
-                if(viewType == 1)
+                DicMainView.Add(viewType,view);
+                if (viewType == 1)
                 {
                     view.Left = mainView.Left - view.Width - 20;
                     view.Top = mainView.Top;
@@ -419,9 +421,59 @@ namespace GPSpeedView
                 MessageBox.Show("请在收盘后进行一键操作");
                 return;
             }
-            string day = DateTime.Now.Year + "" + DateTime.Now.Month + DateTime.Now.Day;
-            string url = $"http://push2ex.eastmoney.com/getTopicZTPool?ut=7eea3edcaed734bea9cbfc24409ed989&dpt=wz.ztzt&Pageindex=0&pagesize=20&sort=fbt%3Aasc&date={day}";
+            string day = DateTime.Now.Year + "" + DateTime.Now.Month.ToString("D2") + DateTime.Now.Day;
+            try
+            {
+                var tuple = GetTopData(day).Result;
+                tuple = GetTopData(day, tuple.Item1).Result;
+                foreach (var item in tuple.Item2)
+                {
+                     if(!ConfigData.LockGPs.Contains(item.Code))
+                        ConfigData.LockGPs.Add(item.Code);
+                }
+                m_ViewModel.InitDataForLockGps();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("获取失败");
+            }
+        }
+        private async Task<Tuple<int, List<ViewEntity>>> GetTopData(string day,int count = 20)
+        {
+            string url = $"http://push2ex.eastmoney.com/getTopicZTPool?ut=7eea3edcaed734bea9cbfc24409ed989&dpt=wz.ztzt&Pageindex=0&pagesize={count}&sort=fbt%3Aasc&date={day}";
 
+            int size = 20;
+            List<ViewEntity> ents = new List<ViewEntity>();
+            using (HttpClient client = new HttpClient())
+            {
+                HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
+                if (response.IsSuccessStatusCode)
+                {
+                    response.EnsureSuccessStatusCode();
+                    string htmlContent = response.Content.ReadAsStringAsync().Result;
+                    if (!string.IsNullOrEmpty(htmlContent))
+                    {
+                        JObject jobject = JObject.Parse(htmlContent);
+                        var childrens = jobject["data"]["pool"].Children();
+                        string totalStr = jobject["data"]["tc"].ToString();
+                        if (!string.IsNullOrEmpty(totalStr))
+                        {
+                            int.TryParse(totalStr, out size);
+                        }
+
+                        foreach (var item in childrens)
+                        {
+                            ViewEntity ent = new ViewEntity();
+                            ent.Code = item["c"].ToString();
+                            ent.Name = item["n"].ToString();
+                            ent.CurPrice = double.TryParse(item["p"].ToString(), out double curPrice) ? curPrice/1000.0 : 0.0;
+                            ent.CurMarkUp = double.TryParse(item["zdp"].ToString(), out double curMarkup) ? Math.Round(curMarkup,2): 0.0;
+                            ents.Add(ent);
+                        }
+                    }
+                }
+            }
+            return new Tuple<int,List<ViewEntity>>(size,ents);
         }
         #endregion
 
