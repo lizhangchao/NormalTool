@@ -52,6 +52,9 @@
                         <DataTrigger Binding="{Binding IsLock}" Value="True">
                             <Setter Property="Background" Value="LightGray"/>
                         </DataTrigger>
+                        <DataTrigger Binding="{Binding IsYestodayTop}" Value="True">
+                            <Setter Property="Background" Value="LightBlue"/>
+                        </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </DataGrid.RowStyle>

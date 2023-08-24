@@ -15,6 +15,7 @@ using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 using GPSpeedView.GPHelpers;
 using GPSpeedView.Models;
 using Newtonsoft.Json;
@@ -424,8 +425,8 @@ namespace GPSpeedView
             string day = DateTime.Now.Year + "" + DateTime.Now.Month.ToString("D2") + DateTime.Now.Day;
             try
             {
-                var tuple = GetTopData(day).Result;
-                tuple = GetTopData(day, tuple.Item1).Result;
+                var tuple = GetTopData(day,true).Result;
+                tuple = GetTopData(day,true, tuple.Item1).Result;
                 foreach (var item in tuple.Item2)
                 {
                      if(!ConfigData.LockGPs.Contains(item.Code))
@@ -438,9 +439,21 @@ namespace GPSpeedView
                 MessageBox.Show("获取失败");
             }
         }
-        private async Task<Tuple<int, List<ViewEntity>>> GetTopData(string day,int count = 20)
+        /// <summary>
+        /// 获取涨停数据
+        /// </summary>
+        /// <param name="day"></param>
+        /// <param name="isToday"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public async Task<Tuple<int, List<ViewEntity>>> GetTopData(string day, bool isToday, int count = 20)
         {
             string url = $"http://push2ex.eastmoney.com/getTopicZTPool?ut=7eea3edcaed734bea9cbfc24409ed989&dpt=wz.ztzt&Pageindex=0&pagesize={count}&sort=fbt%3Aasc&date={day}";
+
+            if (!isToday)
+            {
+                url = $"http://push2ex.eastmoney.com/getYesterdayZTPool?ut=7eea3edcaed734bea9cbfc24409ed989&dpt=wz.ztzt&Pageindex=0&pagesize={count}&sort=zs%3Aasc&date={day}";
+            }
 
             int size = 20;
             List<ViewEntity> ents = new List<ViewEntity>();
@@ -484,7 +497,9 @@ namespace GPSpeedView
     {
         private MainWindow m_View;
 
-        private Timer timer = new Timer();
+        public Action WorkAction;
+
+        private DispatcherTimer dispatcherTimer = new DispatcherTimer();
         private Timer backDataTimer = new Timer();
         public BackgroundWorker worker;
         private string url1ForACCER = "http://74.push2.eastmoney.com/api/qt/clist/get?&pn=1&pz=40&po=1&np=1&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f22&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&fields=f2,f3,f12,f14,f20,f22,f11";
@@ -569,10 +584,10 @@ namespace GPSpeedView
 
                 InitData();
 
-                timer.Interval = 3000;
-                timer.Elapsed -= FlashData;
-                timer.Elapsed += FlashData;
-                timer.Start();
+                dispatcherTimer.Interval = TimeSpan.FromMilliseconds(3000);
+                dispatcherTimer.Tick -= FlashData;
+                dispatcherTimer.Tick += FlashData;
+                dispatcherTimer.Start();
 
                 //一分钟获取一次数据
                 backDataTimer.Interval = 1000;
@@ -732,7 +747,21 @@ namespace GPSpeedView
         /// </summary>
         public void InitData()
         {
-            FlashData(null,null);
+            InitYestodayTopData();
+            FlashData(null, null);
+        }
+        /// <summary>
+        /// 初始化昨日涨停数据
+        /// </summary>
+        private void InitYestodayTopData()
+        {
+            string day = DateTime.Now.Year + "" + DateTime.Now.Month.ToString("D2") + DateTime.Now.Day;
+
+            var tuple = m_View.GetTopData(day, false).Result;
+            tuple = m_View.GetTopData(day, false, tuple.Item1).Result;
+
+            ConfigData.YestodayTopGps.Clear();
+            ConfigData.YestodayTopGps.AddRange(tuple.Item2.Select(x => x.Code));
         }
 
         private bool IsResponsing = false;
@@ -741,7 +770,7 @@ namespace GPSpeedView
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        public void FlashData(object sender, ElapsedEventArgs e)
+        public void FlashData(object sender, EventArgs e)
         {
             if (IsResponsing)
                 return;
@@ -816,10 +845,8 @@ namespace GPSpeedView
                         ents.RemoveAt(i--);
                         continue;
                     }
-                    if (ConfigData.LockGPs.Contains(ents[i].Code))
-                    {
-                        ents[i].IsLock = true;
-                    }
+                    ents[i].IsLock = ConfigData.LockGPs.Contains(ents[i].Code);
+                    ents[i].IsYestodayTop = ConfigData.YestodayTopGps.Contains(ents[i].Code);
                 }
                 int index = 1;
                 ents.ForEach(x => x.Num = index++);
@@ -1115,12 +1142,8 @@ namespace GPSpeedView
                         }
                     }
                 }
-
-                // 盘后加载历史数据
+                //盘后加载历史数据
                 worker.RunWorkerAsync();
-
-                //System.Threading.Thread thread = new System.Threading.Thread(m_View.LoadHistoryExecute);
-                //thread.Start();
             }
         }
         /// <summary>
@@ -1150,7 +1173,6 @@ namespace GPSpeedView
             }
             return false;
         }
-
         #endregion
     }
 
@@ -1267,6 +1289,20 @@ namespace GPSpeedView
             set
             {
                 m_IsHighGp = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool m_IsYestodayTop;
+        /// <summary>
+        /// 昨日涨停
+        /// </summary>
+        public bool IsYestodayTop
+        {
+            get { return m_IsYestodayTop; }
+            set
+            {
+                m_IsYestodayTop = value;
                 RaisePropertyChanged();
             }
         }

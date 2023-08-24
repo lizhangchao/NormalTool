@@ -189,12 +189,20 @@
     <Compile Include="GPHelpers\AlGpHelper.cs" />
     <Compile Include="GPHelpers\DataHelper.cs" />
     <Compile Include="Models\AlGpEntity.cs" />
+    <Compile Include="Models\AutohandlerEntity.cs" />
+    <Compile Include="Views\AIAutoHandleView.xaml.cs">
+      <DependentUpon>AIAutoHandleView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\GPDetailView.xaml.cs">
       <DependentUpon>GPDetailView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\RemoveListView.xaml.cs">
       <DependentUpon>RemoveListView.xaml</DependentUpon>
     </Compile>
+    <Page Include="Views\AIAutoHandleView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ConfigView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -109,6 +109,10 @@ namespace GPSpeedView
         public static Dictionary<string, List<ViewEntity>> MidFastUpGoDataInfo;
 
         public static Dictionary<string, List<double>> TotalGpSufferData = new Dictionary<string, List<double>>();
+        /// <summary>
+        /// 昨日涨停
+        /// </summary>
+        public static List<string> YestodayTopGps = new List<string>();
         #endregion
     }
 
