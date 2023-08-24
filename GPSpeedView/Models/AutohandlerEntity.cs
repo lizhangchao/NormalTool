@@ -69,6 +69,7 @@ namespace GPSpeedView.Models
     public class BuyInGpEntity
     {
         public string GpCode { get; set; }
+        public string Name { get; set; }
         /// <summary>
         /// 买入价格
         /// </summary>

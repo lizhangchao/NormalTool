@@ -20,6 +20,7 @@
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         <Menu x:Name="MenuItems">
+            <MenuItem x:Name="AiAutoItem" Header="模拟" Click="AiAutoItem_Click"/>
             <MenuItem x:Name="SettingMenuItem" Header="设置" Click="SettingMenuItem_Click"/>
             <MenuItem x:Name="SortSettingMenuItem" Header="排序">
                 <MenuItem x:Name="CurACCERMenuItem" Header="涨速" IsCheckable="True" IsChecked="{Binding OrderBy,Converter={StaticResource orderByToBooleanConverter},ConverterParameter=ACCER}"/>

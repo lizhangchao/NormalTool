@@ -18,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using GPSpeedView.GPHelpers;
 using GPSpeedView.Models;
+using GPSpeedView.Views;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Prism;
@@ -488,9 +489,14 @@ namespace GPSpeedView
             }
             return new Tuple<int,List<ViewEntity>>(size,ents);
         }
+
         #endregion
 
-
+        private void AiAutoItem_Click(object sender, RoutedEventArgs e)
+        {
+            AIAutoHandleView view = new AIAutoHandleView();
+            view.Show();
+        }
     }
 
     public class MainViewModel : BindableBase
@@ -1143,7 +1149,7 @@ namespace GPSpeedView
                     }
                 }
                 //盘后加载历史数据
-                worker.RunWorkerAsync();
+                //worker.RunWorkerAsync();
             }
         }
         /// <summary>
